@@ -19,8 +19,13 @@ authRouter.post("/signup", async (req, res) => {
       photoUrl : req.body.photoUrl
     });
 
-    await user.save();
-    res.send("User saved");
+    const Saveduser = await user.save();
+    const token = await Saveduser.getJWT();
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      httpOnly: true,
+    });
+    res.json({data:Saveduser})
   } catch (err) {
     res.status(400).send("Validation Error: " + err.message);
   }

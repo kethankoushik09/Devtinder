@@ -27,6 +27,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
       "about",
       "phoneNo",
       "skills",
+      "photoUrl"
     ];
     const isValid = Object.keys(req.body).every((key) =>
       validproperties.includes(key)
