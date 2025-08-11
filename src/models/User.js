@@ -104,7 +104,7 @@ userSchema.methods.getJWT = async function () {
   const user = this;
   const token = await jwt.sign(
     { _id: user._id },
-    "VDTvFCIcuddv5tu4zyxB26jXj8PESGfg",
+    process.env.JWT_SCRETE_KEY,
     { expiresIn: "7d" }
   );
   return token;
