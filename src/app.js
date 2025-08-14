@@ -14,7 +14,7 @@ dotenv.config();
 
 
 app.use(cors({
-  origin:"http://localhost:5173",
+  origin:["http://localhost:5173", "https://dev-tinder-web-kk.vercel.app"],
   credentials:true
   
 }));
