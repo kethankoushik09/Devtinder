@@ -14,10 +14,12 @@ dotenv.config();
 
 
 app.use(cors({
-  origin:["http://localhost:5173", "https://dev-tinder-web-kk.vercel.app"],
-  credentials:true
-  
+  origin: process.env.NODE_ENV === "production"
+    ? "https://dev-tinder-web-kk.vercel.app"
+    : "http://localhost:5173",
+  credentials: true
 }));
+
 app.use(express.json());
 app.use(cookieParser());
 

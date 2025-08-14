@@ -26,7 +26,7 @@ authRouter.post("/signup", async (req, res) => {
       httpOnly: true,
 
       secure: process.env.NODE_ENV === "production", // true in production
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "lax",
     });
     res.json({ data: Saveduser });
   } catch (err) {
