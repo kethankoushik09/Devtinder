@@ -22,11 +22,10 @@ authRouter.post("/signup", async (req, res) => {
     const Saveduser = await user.save();
     const token = await Saveduser.getJWT();
     res.cookie("token", token, {
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       httpOnly: true,
-
-      secure: process.env.NODE_ENV === "production", // true in production
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production", // true on Vercel
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
     res.json({ data: Saveduser });
   } catch (err) {
