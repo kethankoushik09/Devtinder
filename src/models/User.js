@@ -101,21 +101,25 @@ const userSchema = new Schema(
   }
 );
 userSchema.methods.getJWT = async function () {
+  
   const user = this;
   const token = await jwt.sign(
     { _id: user._id },
-    process.env.JWT_SCRETE_KEY,
+    process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
   return token;
 };
 
 userSchema.methods.validatePasword = async function(userInputPassword) {
+
   const user = this;
     const isPasswordValid = await bcrypt.compare(
       userInputPassword,
       user.password
     );
+    console.log(user.password + '   '+ userInputPassword+"    "+isPasswordValid);
+    
     if (!isPasswordValid) {
       throw new Error("Invalid credentials");
     }

@@ -9,6 +9,7 @@ const bcrypt = require("bcrypt");
 const { signupValidation } = require("../utils/Validations");
 
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
+  
   try {
     const user = req.user;
     res.status(200).send(user);
@@ -36,7 +37,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
       throw new Error("Cannot modify senstive data");
     }
     const loggedInuser = req.user;
-    Object.keys(req.body).every((key) => (loggedInuser[key] = req.body[key]));
+    Object.keys(req.body).forEach((key) => (loggedInuser[key] = req.body[key]));
     await loggedInuser.save();
     res
       .status(200)

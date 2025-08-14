@@ -1,17 +1,23 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models/User");
 
-const userAuth = async(req, res, next) => {
+const userAuth = async (req, res, next) => {
+
   try {
     const { token } = req.cookies;
     if (!token) {
       return res.status(401).send("please login");
     }
-    const decodeObj = jwt.verify(token, process.env.JWT_SCRETE_KEY);
-    const { _id } = decodeObj;
-    const user = await User.findById({_id});
+    console.log(typeof(process.env.JWT_SECRET));
+    
+    const decodeObj = jwt.verify(token, process.env.JWT_SECRET);
+    
+
+    const _id = decodeObj._id; // adjust if your payload key is different
+    const user = await User.findById(_id);
+
     if (!user) {
-      throw new Error("User not found ");
+      throw new Error("User not found");
     }
     req.user = user;
     next();
