@@ -4,7 +4,10 @@ const Chat = require("../models/Chat");
 const intializeSocket = (server) => {
   const io = socket(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin:
+        process.env.NODE_ENV === "production"
+          ? "https://dev-tinder-web-kk.vercel.app"
+          : "http://localhost:5173",
     },
   });
   io.on("connection", (socket) => {
@@ -13,36 +16,39 @@ const intializeSocket = (server) => {
       socket.join(room);
     });
 
-    socket.on("sendMessage", async ({ firstName, lastName, userId, toUserId, text }) => {
-      const roomId = [userId, toUserId].sort().join("_");
-      try {
-        let chat = await Chat.findOne({
-          participants: { $all: [userId, toUserId] },
-        });
-        if (!chat) {
-          chat = new Chat({
-            participants: [userId, toUserId],
-            messages: [],
+    socket.on(
+      "sendMessage",
+      async ({ firstName, lastName, userId, toUserId, text }) => {
+        const roomId = [userId, toUserId].sort().join("_");
+        try {
+          let chat = await Chat.findOne({
+            participants: { $all: [userId, toUserId] },
           });
+          if (!chat) {
+            chat = new Chat({
+              participants: [userId, toUserId],
+              messages: [],
+            });
+          }
+
+          chat.messages.push({
+            senderId: userId,
+            text,
+          });
+          await chat.save();
+
+          io.to(roomId).emit("messageReceived", {
+            firstName,
+            lastName,
+            userId,
+            toUserId,
+            text,
+          });
+        } catch (err) {
+          console.log(err.message);
         }
-
-        chat.messages.push({
-          senderId: userId,
-          text,
-        });
-        await chat.save();
-
-        io.to(roomId).emit("messageReceived", {
-          firstName,
-          lastName,
-          userId,
-          toUserId,
-          text,
-        });
-      } catch (err) {
-        console.log(err.message);
       }
-    });
+    );
 
     socket.on("disconnect", () => {});
   });
