@@ -50,7 +50,6 @@ authRouter.post("/login", async (req, res) => {
     res.cookie("token", token, {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       httpOnly: true,
-      httpOnly: true,
       secure: process.env.NODE_ENV === "production", // true on Vercel
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
@@ -64,6 +63,9 @@ authRouter.post("/login", async (req, res) => {
 
 authRouter.post("/logout", (req, res) => {
   res.cookie("token", null, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // true on Vercel
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     expires: new Date(Date.now()),
   });
   res.send("user logout");

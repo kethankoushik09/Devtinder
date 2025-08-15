@@ -1,26 +1,51 @@
 const socket = require("socket.io");
+const Chat = require("../models/Chat");
 
-const intializeSocket = (server)=>{
-    const io = socket(server, {
-        cors:{
-            origin:"http://localhost:5173"
-        }
+const intializeSocket = (server) => {
+  const io = socket(server, {
+    cors: {
+      origin: "http://localhost:5173",
+    },
+  });
+  io.on("connection", (socket) => {
+    socket.on("joinchat", ({ userId, id }) => {
+      const room = [userId, id].sort().join("_");
+      socket.join(room);
     });
-    io.on("connection",(socket)=>{
-        //hanlde requests
 
-        socket.on("joinchat" , ({ userId, id }) =>{
-            const room = [userId,id].sort().join("_");
-            socket.join(room);
+    socket.on("sendMessage", async ({ firstName, lastName, userId, toUserId, text }) => {
+      const roomId = [userId, toUserId].sort().join("_");
+      try {
+        let chat = await Chat.findOne({
+          participants: { $all: [userId, toUserId] },
         });
+        if (!chat) {
+          chat = new Chat({
+            participants: [userId, toUserId],
+            messages: [],
+          });
+        }
 
-        socket.on("sendMessage", ({firstName, userId, id, text })=>{
-             const roomId = [userId,id].sort().join("_");
-            io.to(roomId).emit("messageReceived",{firstName,userId,id,text})
+        chat.messages.push({
+          senderId: userId,
+          text,
         });
+        await chat.save();
 
-        socket.on("disconnect", () =>{});
-    })
-}
+        io.to(roomId).emit("messageReceived", {
+          firstName,
+          lastName,
+          userId,
+          toUserId,
+          text,
+        });
+      } catch (err) {
+        console.log(err.message);
+      }
+    });
+
+    socket.on("disconnect", () => {});
+  });
+};
 
 module.exports = intializeSocket;

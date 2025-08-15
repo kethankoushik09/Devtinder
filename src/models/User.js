@@ -118,7 +118,6 @@ userSchema.methods.validatePasword = async function(userInputPassword) {
       userInputPassword,
       user.password
     );
-    console.log(user.password + '   '+ userInputPassword+"    "+isPasswordValid);
     
     if (!isPasswordValid) {
       throw new Error("Invalid credentials");
