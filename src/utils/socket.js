@@ -1,6 +1,8 @@
 const socket = require("socket.io");
 const Chat = require("../models/Chat");
 
+const OnlineUsers = new Map();
+
 const intializeSocket = (server) => {
   const io = socket(server, {
     cors: {
@@ -11,9 +13,13 @@ const intializeSocket = (server) => {
     },
   });
   io.on("connection", (socket) => {
+    console.log("socket connected " + socket.id);
+
     socket.on("joinchat", ({ userId, id }) => {
       const room = [userId, id].sort().join("_");
       socket.join(room);
+      OnlineUsers.set(userId, socket.id);
+      io.emit("UserOnline", { userId });
     });
 
     socket.on(
@@ -50,7 +56,20 @@ const intializeSocket = (server) => {
       }
     );
 
-    socket.on("disconnect", () => {});
+    socket.on("checkUserStatus", ({ userId }) => {
+      const isOnline = OnlineUsers.has(userId);
+      socket.emit("userStatus", { userId, online: isOnline });
+    });
+
+    socket.on("disconnect", () => {
+      for (let [userId, socketId] of OnlineUsers) {
+        if (socketId === socket.id) {
+          OnlineUsers.delete(userId);
+          io.emit("UserOffline", { userId });
+          break;
+        }
+      }
+    });
   });
 };
 
