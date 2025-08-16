@@ -13,7 +13,6 @@ const intializeSocket = (server) => {
     },
   });
   io.on("connection", (socket) => {
-    console.log("socket connected " + socket.id);
 
     socket.on("joinchat", ({ userId, id }) => {
       const room = [userId, id].sort().join("_");
